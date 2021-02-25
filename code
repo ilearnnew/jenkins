@@ -1,0 +1,34 @@
+pipeline {
+    agent any 
+ environment
+       {
+         key = " properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '5', numToKeepStr: '15'))])"
+       }
+
+    stages {
+        stage('clone') {
+            steps {
+                 checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/ilearnnew/sparkjava-war-example.git']]]
+                  }
+                      }
+       stage('Build') {
+            steps {
+                   sh 'mvn clean package'
+                  }
+                      }
+              
+      stage('upload nexus') {
+            steps {
+                 nexusArtifactUploader artifacts: [[artifactId: 'a1', classifier: '', file: 'target/sparkjava-hello-world-1.0.war', type: '.war']],                  credentialsId: '29651001-9924-474c-a28c-6994b6519d58',
+                 groupId: 'id',
+                 nexusUrl: '3.137.181.70:8081/nexus',
+                 nexusVersion:                  'nexus2',
+                 protocol: 'http', 
+                 repository: 'us123', 
+                 version: '$BUILD_ID'
+                  }
+                             }
+
+    }
+}
+
